@@ -1,0 +1,112 @@
+---
+title: "Untitled"
+output: html_document
+date: "2022-12-09"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Firstly, set your working directly using the set working director option in the toolbar under 'Session'.
+
+I would set this to a new folder called 'Penguin_project'.
+
+Next, load your libraries 
+
+```{r}
+library(palmerpenguins)
+library(ggplot2)
+library(janitor)
+library(dplyr)
+```
+
+
+What we need to do is create a new folder called raw_data inside our project folder manually.
+
+Next, using the following command we are going to save the variable penguins_raw as a .csv file.
+
+```{r}
+write.csv(penguins_raw, paste0("data_raw/penguins_raw.csv"))
+```
+
+Next, we will make a new function to clean your data, or you can just download and source the function we have used in the function folder, called clean.r
+
+```{r}
+cleaning_my_data <- function(penguins_raw){
+  penguins_raw %>%
+    clean_names () %>%
+    remove_empty(c("rows", "cols")) %>%
+    select (-starts_with("Delta")) %>%
+    select(-comments)
+}
+
+```
+
+This next bit of code runs and saves the output of the function in new data set penguins_now_clean
+
+```{r}
+penguins_clean <- cleaning_my_data(penguins_raw)
+names(penguins_clean)
+```
+
+
+Save the clean data in a new file
+
+```{r}
+write.csv(penguins_clean, paste0("data_clean/penguins_clean.csv"))
+
+```
+
+
+# Running a statistical test: Linear regression model between Culmen length and Culmen depth
+
+```{r}
+linear_regression_model <-lm(culmen_length_mm ~ culmen_depth_mm, penguins_clean)
+summary(linear_regression_model)
+```
+
+ 
+check assumptions of linear modelling are met
+```{r}
+plot(linear_regression_model)
+```
+
+They are successfully met!
+
+```{r}
+ggplot(penguins_clean, aes(x = culmen_length_mm, y = culmen_depth_mm, col = species)) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "red") + labs(title = "Culmen length against depth (mm)", x = "Culmen Length (mm)", y = "Culmen Depth (mm)" )
+
+```
+
+We can turn this into a function:
+
+```{r}
+plot_culmen_figure <- function(penguins_clean){
+  penguins_clean %>% 
+    ggplot(penguins_clean, aes(x = culmen_length_mm, y = culmen_depth_mm, col = species)) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "red") + labs(title = "Culmen length against depth (mm)", x = "Culmen Length (mm)", y = "Culmen Depth (mm)" )
+}
+
+```
+
+Next, we must save the data into our 'Figures' folder, we will do so as a 'png' file
+
+```{r}
+save_culmen_plot_png <- function(penguins_clean, filename, size, res, scaling){
+  agg_png(filename, width = size, 
+                    height = size, 
+                    units = "cm", 
+                    res = res, 
+                    scaling = scaling)
+  culmen_plot <- plot_flipper_figure(penguins_clean)
+  print(culmen_plot)
+  dev.off()
+}
+
+```
+
+
