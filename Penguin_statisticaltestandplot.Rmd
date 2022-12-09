@@ -85,7 +85,7 @@ culmen_plot
 
 We can turn this into a function, note this is not presently working but attempted, see rmarkdown.
 
-```{r, echo = FALSE}
+```{r, eval = FALSE}
 plotting_my_data <- function(penguins_clean){
   penguins_clean %>%
     ggplot(penguins_clean, aes(x = culmen_length_mm, y = culmen_depth_mm, col = species)) + 
